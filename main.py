@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 
 
+
 #.env cors and path config
 # ENV
 # =========================
