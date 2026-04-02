@@ -1,7 +1,6 @@
 import requests
 import streamlit as st
-import warnings
-warnings.filterwarnings("ignore")
+
 # =============================
 # CONFIG
 # =============================
@@ -67,9 +66,10 @@ def goto_details(tmdb_id: int):
 @st.cache_data(ttl=30)  # short cache for autocomplete
 def api_get_json(path: str, params: dict | None = None):
     try:
-        r = requests.get(f"{API_BASE}{path}", params=params, timeout=25)
+        r = requests.get(f"{API_BASE}{path}", params=params, timeout=60)
         if r.status_code >= 400:
             return None, f"HTTP {r.status_code}: {r.text[:300]}"
+        
         return r.json(), None
     except Exception as e:
         return None, f"Request failed: {e}"
@@ -333,7 +333,7 @@ elif st.session_state.view == "details":
 
     if data.get("backdrop_url"):
         st.markdown("#### Backdrop")
-        st.image(data["backdrop_url"],use_container_width=True)
+        st.image(data["backdrop_url"], use_container_width=True)
 
     st.divider()
     st.markdown("### ✅ Recommendations")
