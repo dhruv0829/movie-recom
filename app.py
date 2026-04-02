@@ -97,11 +97,11 @@ def poster_grid(cards, cols=6, key_prefix="grid"):
             with colset[c]:
                 try:
                     if isinstance(poster, str) and poster.startswith("http"):
-                        st.image(poster, use_container_width=True)
+                        st.image(poster)
                     else:
                         raise ValueError("Invalid poster")
                 except:
-                    st.image("https://via.placeholder.com/300x450?text=No+Image", use_container_width=True)
+                    st.image("https://via.placeholder.com/300x450?text=No+Image")
 
                 if st.button("Open", key=f"{key_prefix}_{r}_{c}_{idx}_{tmdb_id}"):
                     if tmdb_id:
