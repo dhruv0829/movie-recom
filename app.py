@@ -6,24 +6,16 @@ import streamlit as st
 # =============================
 API_BASE = "https://movie-recom-dcfy.onrender.com/" or "http://127.0.0.1:8000"
 TMDB_IMG = "https://image.tmdb.org/t/p/w500"
+@st.cache_data
+def fetch_data(url):
+    return requests.get(url).json()
+st.set_page_config(page_title="Movie Recommender", layout="wide")
 
-st.set_page_config(page_title="Movie Recommender", page_icon="🎬", layout="wide")
-
-# =============================
-# STYLES (minimal modern)
-# =============================
-st.markdown(
-    """
-<style>
-.block-container { padding-top: 1rem; padding-bottom: 2rem; max-width: 1400px; }
-.small-muted { color:#6b7280; font-size: 0.92rem; }
-.movie-title { font-size: 0.9rem; line-height: 1.15rem; height: 2.3rem; overflow: hidden; }
-.card { border: 1px solid rgba(0,0,0,0.08); border-radius: 16px; padding: 14px; background: rgba(255,255,255,0.7); }
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
+st.markdown("""
+<h1 style='text-align: center;'>🎬 Movie Recommender System</h1>
+<p style='text-align: center;'>Discover movies using AI + TMDB</p>
+""", unsafe_allow_html=True)
+st.markdown("## 🔥 Trending Movies")
 # =============================
 # STATE + ROUTING (single-file pages)
 # =============================
@@ -43,7 +35,22 @@ if qp_id:
     except:
         pass
 
+st.markdown("## 🔍 Search & Recommend")
 
+movie = st.text_input("Enter movie name")
+
+if st.button("Recommend"):
+    with st.spinner("Getting recommendations... 🍿"):
+        try:
+            res = requests.get(
+                API_BASE + "/recommend/tfidf",
+                params={"title": movie},
+                timeout=60
+            )
+            data = res.json()
+            st.write(data)
+        except:
+            st.error("⚠️ Server is waking up... try again")
 def goto_home():
     st.session_state.view = "home"
     st.query_params["view"] = "home"
@@ -97,11 +104,13 @@ def poster_grid(cards, cols=6, key_prefix="grid"):
             with colset[c]:
                 try:
                     if isinstance(poster, str) and poster.startswith("http"):
-                        st.image(poster)
+                     st.image(poster)
                     else:
-                        raise ValueError("Invalid poster")
+                     raise ValueError("Invalid poster")
                 except:
-                    st.image("https://via.placeholder.com/300x450?text=No+Image")
+                  st.image("https://via.placeholder.com/300x450?text=No+Image")
+
+                st.markdown(f"**{title}**")
 
                 if st.button("Open", key=f"{key_prefix}_{r}_{c}_{idx}_{tmdb_id}"):
                     if tmdb_id:
@@ -227,6 +236,12 @@ st.markdown(
     "<div class='small-muted'>Type keyword → dropdown suggestions + matching results → open → details + recommendations</div>",
     unsafe_allow_html=True,
 )
+try:
+    fetch_data(API_BASE + "/home", timeout=5)
+except:
+    pass
+
+
 st.divider()
 
 # ==========================================================
@@ -279,7 +294,7 @@ if st.session_state.view == "home":
     if err or not home_cards:
         st.error(f"Home feed failed: {err or 'Unknown error'}")
         st.stop()
-
+    st.markdown("## 🔥 Trending Movies")
     poster_grid(home_cards, cols=grid_cols, key_prefix="home_feed")
 
 # ==========================================================
